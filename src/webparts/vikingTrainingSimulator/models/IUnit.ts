@@ -1,4 +1,5 @@
 export interface IUnit {
+  id: string;
   firstName: string;
   lastName: string;
   xp: number;

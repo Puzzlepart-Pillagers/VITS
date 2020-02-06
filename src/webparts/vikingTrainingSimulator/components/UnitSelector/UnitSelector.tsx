@@ -14,6 +14,7 @@ const onUnitSelected = (item?: any, setSelectedUnit?: React.Dispatch<any>) => {
 export const UnitSelector: React.FC<IUnitSelectorProps> = (props: IUnitSelectorProps) => {
   return (
     <div className={styles.unitSelector}>
+      <h3>Select unit to train</h3>
       <DetailsList
         items={props.units}
         isHeaderVisible={false}

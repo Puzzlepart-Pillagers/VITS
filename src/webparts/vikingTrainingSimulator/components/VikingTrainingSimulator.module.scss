@@ -6,12 +6,35 @@
   width: 100%;
   justify-content: space-between;
 
+  .loadingSpinner {
+    margin: 4rem 50%;
+  }
+
   .infoView {
     display: flex;
     flex-direction: column;
+    width: 35%;
+
+    >div {
+      margin: 15px 0;
+    }
+
+    .selectedUnit {
+      @include ms-font-l;
+
+      >button {
+        margin: 10px 0;
+      }
+
+      .unitStats {
+        margin: 3px 0;
+      }
+    }
 
     .kingInfo {
       @include ms-font-xl;
+      display: flex;
+      justify-content: space-between;
     }
   }
 

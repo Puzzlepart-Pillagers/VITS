@@ -1,19 +1,56 @@
 import * as React from 'react';
 import styles from './VikingTrainingSimulator.module.scss';
 import { IVikingTrainingSimulatorProps } from './IVikingTrainingSimulatorProps';
+import { Spinner, SpinnerSize } from 'office-ui-fabric-react/lib/Spinner';
 import * as Helpers from '../helpers/helpers';
 import { UnitSelector } from './UnitSelector/UnitSelector';
 import { IKing } from '../models/IKing';
 import { IUnit } from '../models/IUnit';
+import { PrimaryButton } from 'office-ui-fabric-react';
+import { clone } from '@microsoft/sp-lodash-subset';
 
 
 const { useEffect, useState } = React;
 
 export const VikingTrainingSimulator: React.FC<IVikingTrainingSimulatorProps> = (props: IVikingTrainingSimulatorProps) => {
   const [isLoading, setIsLoading] = useState(true);
-  const [currentKing, setKing] = useState(null);
+  const [currentKing, setKing]: [IKing, React.Dispatch<any>] = useState(null);
   const [units, setUnits] = useState([]);
-  const [selectedUnit, setSelectedUnit] = useState(null);
+  const [selectedUnit, setSelectedUnit]: [IUnit, React.Dispatch<any>] = useState(null);
+
+  const udpateUnitXP = async (userEmail: string, unitId: string, newXP: number) => {
+    let headers = new Headers();
+    headers.append('Content-Type', 'application/json');
+    const body =
+    {
+      email: userEmail,
+      id: unitId,
+      XP: newXP
+    };
+    try {
+      await fetch(`https://pillagers-storage-functions.azurewebsites.net/api/SetXp`, {
+        headers,
+        method: 'post',
+        body: JSON.stringify(body)
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const onTrainClick = (userEmail: string, unitId: string, unitXP: number, xpGain: number) => {
+    const newXPValue = unitXP + xpGain;
+    let unitsCopy: IUnit[] = clone(units);
+    unitsCopy.forEach(unit => {
+      if (unit.id === unitId) {
+        unit['xp'] = newXPValue;
+      }
+    });
+    setUnits(unitsCopy);
+
+    udpateUnitXP(userEmail, unitId, newXPValue);
+
+  };
 
   const fetchUnits = async (userEmail: string) => {
     const res = await fetch(`https://pillagers-storage-functions.azurewebsites.net/api/GetUnits?email=${userEmail}`);
@@ -40,19 +77,33 @@ export const VikingTrainingSimulator: React.FC<IVikingTrainingSimulatorProps> = 
     fetchData(props.userEmail);
   }, []);
 
+  console.log(currentKing);
   console.log(units);
-  if (!isLoading && currentKing) {
 
-    return (
-      <>
-        <div className={styles.vikingTrainingSimulator}>
+  return (
+    <div className={styles.vikingTrainingSimulator}>
+      {isLoading && <Spinner className={styles.loadingSpinner} label='Fetching data...' size={SpinnerSize.large} />}
+      {!isLoading && currentKing &&
+        <>
           <div className={styles.infoView}>
             <div className={styles.kingInfo}>
-              {`Email: ${currentKing.email} Penning: ${currentKing.penning}`}
+              {
+                <>
+                  <div>{currentKing.firstName} {currentKing.lastName}</div>
+                  <div>Penning: {currentKing.penning}</div>
+                </>
+              }
             </div>
             {selectedUnit &&
-              <div>
+              <div className={styles.selectedUnit}>
                 {`Selected Unit: ${selectedUnit.firstName} ${selectedUnit.lastName}`}
+                <div className={styles.unitStats}>
+                  <div>XP: {selectedUnit.xp}</div>
+                  <div>Level: {selectedUnit.level}</div>
+                  <div>Rank: {selectedUnit.rank}</div>
+                  <div>Status: {selectedUnit.dead ? 'Dead' : 'Alive'}</div>
+                </div>
+                <PrimaryButton text='Train!' onClick={() => onTrainClick(props.userEmail, selectedUnit.id, selectedUnit.xp, currentKing.XPGain)} />
               </div>
             }
           </div>
@@ -62,8 +113,8 @@ export const VikingTrainingSimulator: React.FC<IVikingTrainingSimulatorProps> = 
               setSelectedUnit={setSelectedUnit}
             />
           </div>
-        </div>
-      </>
-    );
-  } else return <div></div>;
+        </>
+      }
+    </div >
+  );
 };

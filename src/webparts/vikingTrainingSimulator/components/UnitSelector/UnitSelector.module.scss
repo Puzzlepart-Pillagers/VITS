@@ -2,4 +2,8 @@
 
 .unitSelector {
   width: 29rem;
+
+  >h3 {
+    @include ms-font-xl;
+  }
 }
