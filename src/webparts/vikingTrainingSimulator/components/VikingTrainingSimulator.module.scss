@@ -1,5 +1,18 @@
 @import '~office-ui-fabric-react/dist/sass/References.scss';
 
 .vikingTrainingSimulator {
-  margin: 0;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: space-between;
+
+  .infoView {
+    display: flex;
+    flex-direction: column;
+
+    .kingInfo {
+      @include ms-font-xl;
+    }
+  }
+
 }

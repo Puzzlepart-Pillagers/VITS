@@ -1,3 +1,3 @@
 export interface IVikingTrainingSimulatorProps {
-  description: string;
+  userEmail: string;
 }
