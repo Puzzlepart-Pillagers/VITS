@@ -1,0 +1,18 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "viking-training-simulator-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/vikingTrainingSimulator/VikingTrainingSimulatorWebPart.js",
+          "manifest": "./src/webparts/vikingTrainingSimulator/VikingTrainingSimulatorWebPart.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "VikingTrainingSimulatorWebPartStrings": "lib/webparts/vikingTrainingSimulator/loc/{locale}.js"
+  }
+}
