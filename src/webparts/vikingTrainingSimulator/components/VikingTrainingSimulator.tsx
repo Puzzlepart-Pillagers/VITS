@@ -52,6 +52,18 @@ export const VikingTrainingSimulator: React.FC<IVikingTrainingSimulatorProps> = 
 
   };
 
+  const fetchXpTable = async () => {
+    const res = await fetch(`https://pillagers-storage-functions.azurewebsites.net/api/GetLevels`);
+    const json = await res.json();
+    console.log(json);
+  };
+
+  const fetchRankRequirements = async () => {
+    const res = await fetch(`https://pillagers-storage-functions.azurewebsites.net/api/GetRanks`);
+    const json = await res.json();
+    console.log(json);
+  };
+
   const fetchUnits = async (userEmail: string) => {
     const res = await fetch(`https://pillagers-storage-functions.azurewebsites.net/api/GetUnits?email=${userEmail}`);
     const json = await res.json();
@@ -67,6 +79,9 @@ export const VikingTrainingSimulator: React.FC<IVikingTrainingSimulatorProps> = 
     const king: IKing = await fetchKing(userEmail);
     if (king) {
       const kingsUnits: IUnit[] = await fetchUnits(userEmail);
+      // TOOD: Map these values
+      await fetchXpTable();
+      await fetchRankRequirements();
       setKing(king);
       setUnits(kingsUnits);
       setIsLoading(false);
