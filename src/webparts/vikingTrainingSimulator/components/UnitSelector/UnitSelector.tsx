@@ -4,7 +4,17 @@ import { IUnitSelectorProps } from './IUnitSelectorProps';
 import { DetailsList, IColumn, CheckboxVisibility } from 'office-ui-fabric-react';
 
 const onRenderItemColumn = (item?: any, index?: number, column?: IColumn) => {
-  return `${item.firstName} ${item.lastName}`;
+  switch (column.key) {
+    case 'unit':
+      return `${item.firstName} ${item.lastName}`;
+    case 'lvl':
+      return `Level ${item.level}`;
+
+    case 'rank':
+      return item.rank;
+    default:
+      break;
+  }
 };
 
 const onUnitSelected = (item?: any, setSelectedUnit?: React.Dispatch<any>) => {
@@ -16,9 +26,15 @@ export const UnitSelector: React.FC<IUnitSelectorProps> = (props: IUnitSelectorP
     <div className={styles.unitSelector}>
       <h3>Select unit to train</h3>
       <DetailsList
+        styles={{ root: { backgroundColor: '#1ab188' } }}
         items={props.units}
         isHeaderVisible={false}
-        columns={[{ key: 'unit', name: 'Unit', minWidth: 100, maxWidth: 300 }]}
+        selectionPreservedOnEmptyClick
+        columns={[
+          { key: 'unit', name: 'Unit', minWidth: 100, maxWidth: 300 },
+          { key: 'lvl', name: 'Level', minWidth: 50, maxWidth: 100 },
+          { key: 'rank', name: 'Rank', minWidth: 50, maxWidth: 100 }
+        ]}
         onRenderItemColumn={onRenderItemColumn}
         checkboxVisibility={CheckboxVisibility.hidden}
         onActiveItemChanged={(item) => onUnitSelected(item, props.setSelectedUnit)}

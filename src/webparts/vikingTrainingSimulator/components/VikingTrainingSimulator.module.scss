@@ -1,6 +1,8 @@
 @import '~office-ui-fabric-react/dist/sass/References.scss';
 
+
 .vikingTrainingSimulator {
+  background-color: #07222b;
   display: flex;
   flex-direction: row;
   width: 100%;
@@ -41,6 +43,7 @@
           left: 75px;
           font-weight: 400;
           color: #757575;
+
           &:focus {
             outline: none;
             animation: pop 0.3s cubic-bezier(0.4, 0, 1, 1) 1;
@@ -75,6 +78,15 @@
       display: flex;
       justify-content: space-between;
     }
+
+    .button {
+      background-color: #1ab188;
+
+      &:hover {
+        background-color: #1ab188;
+      }
+    }
+
   }
 
 }

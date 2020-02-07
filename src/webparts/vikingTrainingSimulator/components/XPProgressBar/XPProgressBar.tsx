@@ -18,7 +18,7 @@ export const XPProgressBar: React.FC<IXPProgressBarProps> = (props: IXPProgressB
   const defaultProps = {
     completed: 0,
     prevTotal: 0,
-    color: '#0BD318',
+    color: '#1ab188',
     animation: 200,
     height: 10
   };

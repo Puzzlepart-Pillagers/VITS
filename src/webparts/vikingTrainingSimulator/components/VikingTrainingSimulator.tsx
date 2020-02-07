@@ -169,7 +169,9 @@ export const VikingTrainingSimulator: React.FC<IVikingTrainingSimulatorProps> = 
 
   useEffect(() => {
     if (selectedUnit && xpTable) {
-      const nextLevelRequirement = xpTable.filter(item => item.lvl === selectedUnit.level + 1)[0].xp;
+      const nextLevelRequirement =
+      xpTable.filter(item => item.lvl === selectedUnit.level + 1)[0] ?
+      xpTable.filter(item => item.lvl === selectedUnit.level + 1)[0].xp : 0;
       console.log(xpTable);
       const prevLevelXpRequirement = xpTable.filter(item => item.lvl === selectedUnit.level)[0].xp;
       setXpToNextLevel(nextLevelRequirement ? nextLevelRequirement : 0);
@@ -221,7 +223,7 @@ export const VikingTrainingSimulator: React.FC<IVikingTrainingSimulatorProps> = 
                   <div>Rank: {selectedUnit.rank}</div>
                   <div>Status: {selectedUnit.dead ? 'Dead' : 'Alive'}</div>
                 </div>
-                <PrimaryButton text='Train!' onClick={() => onTrainClick(props.userEmail, selectedUnit.id, selectedUnit.xp, currentKing.XPGain)} />
+                <PrimaryButton className={styles.button} text='Train!' onClick={() => onTrainClick(props.userEmail, selectedUnit.id, selectedUnit.xp, currentKing.XPGain)} />
               </div>
             }
           </div>

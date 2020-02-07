@@ -1,9 +1,14 @@
 @import '~office-ui-fabric-react/dist/sass/References.scss';
 
+[class^="ms-DetailsRow"] {
+  background-color: #142d36;
+}
+
 .unitSelector {
   width: 29rem;
 
   >h3 {
     @include ms-font-xl;
   }
+
 }
