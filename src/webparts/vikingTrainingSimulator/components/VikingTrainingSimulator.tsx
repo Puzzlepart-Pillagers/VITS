@@ -8,6 +8,8 @@ import { IKing } from '../models/IKing';
 import { IUnit } from '../models/IUnit';
 import { PrimaryButton } from 'office-ui-fabric-react';
 import { clone } from '@microsoft/sp-lodash-subset';
+import { IXpTable } from '../models/IXpTable';
+import { IRank } from '../models/IRank';
 
 
 const { useEffect, useState } = React;
@@ -17,6 +19,9 @@ export const VikingTrainingSimulator: React.FC<IVikingTrainingSimulatorProps> = 
   const [currentKing, setKing]: [IKing, React.Dispatch<any>] = useState(null);
   const [units, setUnits] = useState([]);
   const [selectedUnit, setSelectedUnit]: [IUnit, React.Dispatch<any>] = useState(null);
+  const [xpTable, setXpTable]: [IXpTable[], React.Dispatch<any>] = useState([]);
+  const [ranks, setRanks]: [IRank[], React.Dispatch<any>] = useState([]);
+  const [xpToNextLevel, setXpToNextLevel] = useState(null);
 
   const udpateUnitXP = async (userEmail: string, unitId: string, newXP: number) => {
     let headers = new Headers();
@@ -38,12 +43,63 @@ export const VikingTrainingSimulator: React.FC<IVikingTrainingSimulatorProps> = 
     }
   };
 
+  const udpateUnitLevel = async (userEmail: string, unitId: string, newLvl: number) => {
+    let headers = new Headers();
+    headers.append('Content-Type', 'application/json');
+    const body =
+    {
+      email: userEmail,
+      id: unitId,
+      Level: newLvl
+    };
+    try {
+      await fetch(`https://pillagers-storage-functions.azurewebsites.net/api/SetLevel`, {
+        headers,
+        method: 'post',
+        body: JSON.stringify(body)
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const updateUnitRank = async (userEmail: string, unitId: string, rank: string) => {
+    let headers = new Headers();
+    headers.append('Content-Type', 'application/json');
+    const body =
+    {
+      email: userEmail,
+      id: unitId,
+      Rank: rank
+    };
+    try {
+      await fetch(`https://pillagers-storage-functions.azurewebsites.net/api/SetRank`, {
+        headers,
+        method: 'post',
+        body: JSON.stringify(body)
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   const onTrainClick = (userEmail: string, unitId: string, unitXP: number, xpGain: number) => {
     const newXPValue = unitXP + xpGain;
     let unitsCopy: IUnit[] = clone(units);
     unitsCopy.forEach(unit => {
       if (unit.id === unitId) {
         unit['xp'] = newXPValue;
+        if (newXPValue >= xpToNextLevel) {
+          const newLvl = unit['level'] + 1;
+          const rank = ranks.filter(r => r.level <= newLvl).reverse()[0].rank;
+          console.log(rank);
+          unit['level'] = newLvl;
+          unit['rank'] = rank;
+          const nextLevelReq = xpTable.filter(item => item.lvl === newLvl + 1)[0].xp;
+          setXpToNextLevel(nextLevelReq);
+          udpateUnitLevel(userEmail, unitId, newLvl);
+          updateUnitRank(userEmail, unitId, rank);
+        }
       }
     });
     setUnits(unitsCopy);
@@ -55,13 +111,23 @@ export const VikingTrainingSimulator: React.FC<IVikingTrainingSimulatorProps> = 
   const fetchXpTable = async () => {
     const res = await fetch(`https://pillagers-storage-functions.azurewebsites.net/api/GetLevels`);
     const json = await res.json();
-    console.log(json);
+    return json.value.map(i => {
+      return {
+        lvl: i.Level,
+        xp: i.ReqXp
+      };
+    });
   };
 
   const fetchRankRequirements = async () => {
     const res = await fetch(`https://pillagers-storage-functions.azurewebsites.net/api/GetRanks`);
     const json = await res.json();
-    console.log(json);
+    return json.value.map(i => {
+      return {
+        level: i.Level,
+        rank: i.Rank
+      };
+    });
   };
 
   const fetchUnits = async (userEmail: string) => {
@@ -79,9 +145,10 @@ export const VikingTrainingSimulator: React.FC<IVikingTrainingSimulatorProps> = 
     const king: IKing = await fetchKing(userEmail);
     if (king) {
       const kingsUnits: IUnit[] = await fetchUnits(userEmail);
-      // TOOD: Map these values
-      await fetchXpTable();
-      await fetchRankRequirements();
+      const table: IXpTable[] = await fetchXpTable();
+      const rankReqs: IRank[] = await fetchRankRequirements();
+      setXpTable(table);
+      setRanks(rankReqs);
       setKing(king);
       setUnits(kingsUnits);
       setIsLoading(false);
@@ -89,11 +156,15 @@ export const VikingTrainingSimulator: React.FC<IVikingTrainingSimulatorProps> = 
   };
 
   useEffect(() => {
+    if (selectedUnit && xpTable) {
+      const nextLevelRequirement = xpTable.filter(item => item.lvl === selectedUnit.level + 1)[0].xp;
+      setXpToNextLevel(nextLevelRequirement);
+    }
+  }, [selectedUnit]);
+
+  useEffect(() => {
     fetchData(props.userEmail);
   }, []);
-
-  console.log(currentKing);
-  console.log(units);
 
   return (
     <div className={styles.vikingTrainingSimulator}>
@@ -102,12 +173,8 @@ export const VikingTrainingSimulator: React.FC<IVikingTrainingSimulatorProps> = 
         <>
           <div className={styles.infoView}>
             <div className={styles.kingInfo}>
-              {
-                <>
-                  <div>{currentKing.firstName} {currentKing.lastName}</div>
-                  <div>Penning: {currentKing.penning}</div>
-                </>
-              }
+              <div>{currentKing.firstName} {currentKing.lastName}</div>
+              <div>Penning: {currentKing.penning}</div>
             </div>
             {selectedUnit &&
               <div className={styles.selectedUnit}>
@@ -130,6 +197,6 @@ export const VikingTrainingSimulator: React.FC<IVikingTrainingSimulatorProps> = 
           </div>
         </>
       }
-    </div >
+    </div>
   );
 };
