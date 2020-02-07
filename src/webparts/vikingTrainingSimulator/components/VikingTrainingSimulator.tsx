@@ -6,13 +6,13 @@ import * as Helpers from '../helpers/helpers';
 import { UnitSelector } from './UnitSelector/UnitSelector';
 import { IKing } from '../models/IKing';
 import { IUnit } from '../models/IUnit';
-import { PrimaryButton } from 'office-ui-fabric-react';
+import { PrimaryButton, DefaultButton } from 'office-ui-fabric-react';
 import { clone } from '@microsoft/sp-lodash-subset';
 import { IXpTable } from '../models/IXpTable';
 import { IRank } from '../models/IRank';
+import { XPProgressBar } from './XPProgressBar/XPProgressBar';
 
-
-const { useEffect, useState } = React;
+const { useEffect, useState, useRef } = React;
 
 export const VikingTrainingSimulator: React.FC<IVikingTrainingSimulatorProps> = (props: IVikingTrainingSimulatorProps) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -22,6 +22,9 @@ export const VikingTrainingSimulator: React.FC<IVikingTrainingSimulatorProps> = 
   const [xpTable, setXpTable]: [IXpTable[], React.Dispatch<any>] = useState([]);
   const [ranks, setRanks]: [IRank[], React.Dispatch<any>] = useState([]);
   const [xpToNextLevel, setXpToNextLevel] = useState(null);
+  const [prevLevelXpReq, setPreviousXpLevelReq] = useState(null);
+
+  const lvl = useRef(null);
 
   const udpateUnitXP = async (userEmail: string, unitId: string, newXP: number) => {
     let headers = new Headers();
@@ -96,7 +99,9 @@ export const VikingTrainingSimulator: React.FC<IVikingTrainingSimulatorProps> = 
           unit['level'] = newLvl;
           unit['rank'] = rank;
           const nextLevelReq = xpTable.filter(item => item.lvl === newLvl + 1)[0].xp;
+          const prevLevelXpRequirement = xpTable.filter(item => item.lvl === selectedUnit.level)[0].xp;
           setXpToNextLevel(nextLevelReq);
+          setPreviousXpLevelReq(prevLevelXpRequirement ? prevLevelXpRequirement : 0);
           udpateUnitLevel(userEmail, unitId, newLvl);
           updateUnitRank(userEmail, unitId, rank);
         }
@@ -156,9 +161,19 @@ export const VikingTrainingSimulator: React.FC<IVikingTrainingSimulatorProps> = 
   };
 
   useEffect(() => {
+    if (selectedUnit) {
+      console.log(lvl.current);
+      lvl.current.focus();
+    }
+  }, [selectedUnit && selectedUnit.level]);
+
+  useEffect(() => {
     if (selectedUnit && xpTable) {
       const nextLevelRequirement = xpTable.filter(item => item.lvl === selectedUnit.level + 1)[0].xp;
-      setXpToNextLevel(nextLevelRequirement);
+      console.log(xpTable);
+      const prevLevelXpRequirement = xpTable.filter(item => item.lvl === selectedUnit.level)[0].xp;
+      setXpToNextLevel(nextLevelRequirement ? nextLevelRequirement : 0);
+      setPreviousXpLevelReq(prevLevelXpRequirement);
     }
   }, [selectedUnit]);
 
@@ -166,6 +181,9 @@ export const VikingTrainingSimulator: React.FC<IVikingTrainingSimulatorProps> = 
     fetchData(props.userEmail);
   }, []);
 
+
+  console.log(`prevLevel: ${prevLevelXpReq}`, `nextLevel: ${xpToNextLevel}`);
+  console.log(units);
   return (
     <div className={styles.vikingTrainingSimulator}>
       {isLoading && <Spinner className={styles.loadingSpinner} label='Fetching data...' size={SpinnerSize.large} />}
@@ -178,10 +196,28 @@ export const VikingTrainingSimulator: React.FC<IVikingTrainingSimulatorProps> = 
             </div>
             {selectedUnit &&
               <div className={styles.selectedUnit}>
-                {`Selected Unit: ${selectedUnit.firstName} ${selectedUnit.lastName}`}
+                <h3>{selectedUnit.firstName} {selectedUnit.lastName}</h3>
+                <div className={styles.levelContainer}>Level:
+                <div
+                    ref={lvl}
+                    onFocus={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                    tabIndex={-1}
+                    className={styles.level}>
+                    {selectedUnit.level}
+                  </div>
+                </div>
                 <div className={styles.unitStats}>
                   <div>XP: {selectedUnit.xp}</div>
-                  <div>Level: {selectedUnit.level}</div>
+                  <span>Next level</span>
+                  <XPProgressBar
+                    className={styles.progressbarContainer}
+                    completed={selectedUnit.xp}
+                    text={`${selectedUnit.xp}/${xpToNextLevel}XP`}
+                    prevTotal={prevLevelXpReq ? prevLevelXpReq : 0}
+                    total={xpToNextLevel}
+                    height={20}
+                  />
+
                   <div>Rank: {selectedUnit.rank}</div>
                   <div>Status: {selectedUnit.dead ? 'Dead' : 'Alive'}</div>
                 </div>

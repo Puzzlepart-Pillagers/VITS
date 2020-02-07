@@ -22,12 +22,51 @@
     .selectedUnit {
       @include ms-font-l;
 
+      >h3 {
+        @include ms-font-xxl;
+      }
+
       >button {
         margin: 10px 0;
       }
 
+      .levelContainer {
+        @include ms-font-xl;
+        margin: 15px 0;
+        position: relative;
+
+        .level {
+          position: absolute;
+          top: 0;
+          left: 75px;
+          font-weight: 400;
+          color: #757575;
+          &:focus {
+            outline: none;
+            animation: pop 0.3s cubic-bezier(0.4, 0, 1, 1) 1;
+          }
+        }
+      }
+
       .unitStats {
         margin: 3px 0;
+
+        @keyframes pop {
+          50% {
+            transform: scale(3);
+          }
+        }
+
+        .progressbarContainer {
+          border: 1px solid #ddd;
+          padding: 1px;
+          max-width: 225px;
+
+          .progressbarProgress {
+            margin: 0;
+          }
+        }
+
       }
     }
 
