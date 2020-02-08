@@ -6,7 +6,7 @@ import * as Helpers from '../helpers/helpers';
 import { UnitSelector } from './UnitSelector/UnitSelector';
 import { IKing } from '../models/IKing';
 import { IUnit } from '../models/IUnit';
-import { PrimaryButton, DefaultButton } from 'office-ui-fabric-react';
+import { PrimaryButton, Modal } from 'office-ui-fabric-react';
 import { clone } from '@microsoft/sp-lodash-subset';
 import { IXpTable } from '../models/IXpTable';
 import { IRank } from '../models/IRank';
@@ -23,6 +23,7 @@ export const VikingTrainingSimulator: React.FC<IVikingTrainingSimulatorProps> = 
   const [ranks, setRanks]: [IRank[], React.Dispatch<any>] = useState([]);
   const [xpToNextLevel, setXpToNextLevel] = useState(null);
   const [prevLevelXpReq, setPreviousXpLevelReq] = useState(null);
+  const [rankUp, setRankUp] = useState(null);
 
   const lvl = useRef(null);
 
@@ -97,7 +98,10 @@ export const VikingTrainingSimulator: React.FC<IVikingTrainingSimulatorProps> = 
           const rank = ranks.filter(r => r.level <= newLvl).reverse()[0].rank;
           console.log(rank);
           unit['level'] = newLvl;
-          unit['rank'] = rank;
+          if (unit['rank'] !== rank) {
+            unit['rank'] = rank;
+            setRankUp({ unit: selectedUnit, rank });
+          }
           const nextLevelReq = xpTable.filter(item => item.lvl === newLvl + 1)[0].xp;
           const prevLevelXpRequirement = xpTable.filter(item => item.lvl === selectedUnit.level)[0].xp;
           setXpToNextLevel(nextLevelReq);
@@ -170,8 +174,8 @@ export const VikingTrainingSimulator: React.FC<IVikingTrainingSimulatorProps> = 
   useEffect(() => {
     if (selectedUnit && xpTable) {
       const nextLevelRequirement =
-      xpTable.filter(item => item.lvl === selectedUnit.level + 1)[0] ?
-      xpTable.filter(item => item.lvl === selectedUnit.level + 1)[0].xp : 0;
+        xpTable.filter(item => item.lvl === selectedUnit.level + 1)[0] ?
+          xpTable.filter(item => item.lvl === selectedUnit.level + 1)[0].xp : 0;
       console.log(xpTable);
       const prevLevelXpRequirement = xpTable.filter(item => item.lvl === selectedUnit.level)[0].xp;
       setXpToNextLevel(nextLevelRequirement ? nextLevelRequirement : 0);
@@ -183,11 +187,24 @@ export const VikingTrainingSimulator: React.FC<IVikingTrainingSimulatorProps> = 
     fetchData(props.userEmail);
   }, []);
 
+  const renderRankUpModal = () => {
+    setTimeout(() => {
+      setRankUp(null);
+    }, 5000);
+    return (
+      <div className={styles.rankUpModal}>
 
-  console.log(`prevLevel: ${prevLevelXpReq}`, `nextLevel: ${xpToNextLevel}`);
-  console.log(units);
+      </div>
+    );
+  };
   return (
     <div className={styles.vikingTrainingSimulator}>
+      {rankUp && <Modal
+        isOpen
+        isBlocking
+      >
+        {renderRankUpModal()}
+      </Modal>}
       {isLoading && <Spinner className={styles.loadingSpinner} label='Fetching data...' size={SpinnerSize.large} />}
       {!isLoading && currentKing &&
         <>

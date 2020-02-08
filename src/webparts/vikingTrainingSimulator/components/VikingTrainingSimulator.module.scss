@@ -42,7 +42,6 @@
           top: 0;
           left: 75px;
           font-weight: 400;
-          color: #757575;
 
           &:focus {
             outline: none;
@@ -88,5 +87,14 @@
     }
 
   }
+
+}
+
+.rankUpModal {
+  @include ms-font-xl;
+  width: 50vh;
+  height: 50vh;
+  padding: 100px;
+
 
 }
