@@ -93,8 +93,76 @@
 .rankUpModal {
   @include ms-font-xl;
   width: 50vh;
-  height: 50vh;
+  height: 14vh;
   padding: 100px;
+  overflow: hidden;
 
+  .unitName {
+    @include ms-font-xxl;
+    text-align: center;
+  }
 
+  .ranks {
+    position: relative;
+
+    .unitRank {
+      @include ms-font-xxl;
+      margin: 20px 0;
+      text-align: center;
+      position: absolute;
+      left: 44%;
+      top: 50px;
+
+      -webkit-transition: 2s ease-in;
+      -moz-transition: 2s ease-in;
+      -o-transition: 2s ease-in;
+      transition: 2s ease-in;
+      animation-name: rocketIn;
+      animation-duration: 4s;
+      animation-iteration-count: 1;
+      animation-direction: normal;
+
+    }
+
+    .oldRank {
+      @include ms-font-xxl;
+      margin: 20px 0;
+      text-align: center;
+      position: absolute;
+      left: 44%;
+      top: 50px;
+
+      -webkit-transition: 2s ease-out;
+      -moz-transition: 2s ease-out;
+      -o-transition: 2s ease-out;
+      transition: 2s ease-out;
+      animation-name: rocketOut;
+      animation-duration: 2s;
+      animation-delay: 2s;
+      animation-iteration-count: 1;
+      animation-direction: normal;
+      animation-fill-mode: forwards;
+    }
+
+    @keyframes rocketIn {
+      from {
+        transform: translate(-500px);
+      }
+
+      to {
+        transform: translate(0px, 0);
+      }
+    }
+
+    @keyframes rocketOut {
+      from {
+        transform: translate(0px, 0);
+      }
+
+      to {
+        transform: translate(500px);
+      }
+    }
+
+  }
 }

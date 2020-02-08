@@ -99,8 +99,9 @@ export const VikingTrainingSimulator: React.FC<IVikingTrainingSimulatorProps> = 
           console.log(rank);
           unit['level'] = newLvl;
           if (unit['rank'] !== rank) {
+            let prevRank = unit['rank'];
             unit['rank'] = rank;
-            setRankUp({ unit: selectedUnit, rank });
+            setRankUp({ unit: selectedUnit, rank, prevRank });
           }
           const nextLevelReq = xpTable.filter(item => item.lvl === newLvl + 1)[0].xp;
           const prevLevelXpRequirement = xpTable.filter(item => item.lvl === selectedUnit.level)[0].xp;
@@ -190,13 +191,20 @@ export const VikingTrainingSimulator: React.FC<IVikingTrainingSimulatorProps> = 
   const renderRankUpModal = () => {
     setTimeout(() => {
       setRankUp(null);
-    }, 5000);
+    }, 4000);
+    console.log(rankUp);
     return (
       <div className={styles.rankUpModal}>
+        <div className={styles.unitName}> {`${selectedUnit.firstName} ${selectedUnit.lastName} is ranking up!`}</div>
+        <div className={styles.ranks}>
+          <div className={styles.unitRank}>{rankUp.rank}</div>
+          <div className={styles.oldRank}>{rankUp.prevRank}</div>
 
+        </div>
       </div>
     );
   };
+
   return (
     <div className={styles.vikingTrainingSimulator}>
       {rankUp && <Modal
